@@ -7,13 +7,17 @@ class VirtualObject:
         self,
         x,
         y,
-        radius=50
+        radius=60,
+        name="Object"
     ):
 
         self.x = x
+
         self.y = y
 
         self.radius = radius
+
+        self.name = name
 
 
 class InteractionEngine:
@@ -25,18 +29,18 @@ class InteractionEngine:
         self.grabbed_object = None
 
 
-    # =====================================
+    # =========================================================
     # ADD OBJECT
-    # =====================================
+    # =========================================================
 
     def add_object(self, obj):
 
         self.objects.append(obj)
 
 
-    # =====================================
-    # FIND OBJECT
-    # =====================================
+    # =========================================================
+    # FIND OBJECT UNDER GAZE
+    # =========================================================
 
     def find_object(
         self,
@@ -44,90 +48,82 @@ class InteractionEngine:
         y
     ):
 
+        closest = None
+
+        closest_distance = float("inf")
+
+
         for obj in self.objects:
 
             distance = math.sqrt(
-
                 (x - obj.x) ** 2
-
                 +
-
                 (y - obj.y) ** 2
-
             )
 
 
             if distance <= obj.radius:
 
-                return obj
+                if distance < closest_distance:
+
+                    closest = obj
+
+                    closest_distance = distance
 
 
-        return None
+        return closest
 
 
-    # =====================================
-    # PROCESS GESTURE
-    # =====================================
+    # =========================================================
+    # GRAB
+    # =========================================================
 
-    def process_event(
+    def grab(
         self,
-        event,
+        obj
+    ):
+
+        if obj is None:
+
+            return
+
+
+        self.grabbed_object = obj
+
+
+        print(
+            f"GRABBED: {obj.name}"
+        )
+
+
+    # =========================================================
+    # RELEASE
+    # =========================================================
+
+    def release(self):
+
+        if self.grabbed_object:
+
+            print(
+                f"RELEASED: "
+                f"{self.grabbed_object.name}"
+            )
+
+
+        self.grabbed_object = None
+
+
+    # =========================================================
+    # MOVE
+    # =========================================================
+
+    def move(
+        self,
         x,
         y
     ):
 
-        # ---------------------------------
-        # START GRAB
-        # ---------------------------------
-
-        if event == "PINCH_START":
-
-            obj = self.find_object(
-                x,
-                y
-            )
-
-
-            if obj:
-
-                self.grabbed_object = obj
-
-                print(
-                    "GRABBED OBJECT"
-                )
-
-
-        # ---------------------------------
-        # RELEASE
-        # ---------------------------------
-
-        elif event == "PINCH_END":
-
-            if self.grabbed_object:
-
-                print(
-                    "RELEASED OBJECT"
-                )
-
-                self.grabbed_object = None
-
-
-    # =====================================
-    # UPDATE
-    # =====================================
-
-    def update(
-        self,
-        x,
-        y,
-        is_pinching
-    ):
-
-        if (
-            is_pinching
-            and
-            self.grabbed_object
-        ):
+        if self.grabbed_object:
 
             self.grabbed_object.x = x
 
