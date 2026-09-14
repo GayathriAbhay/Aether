@@ -1,0 +1,21 @@
+system:
+  log_level: "INFO"
+  device: "cuda"
+
+camera:
+  device_id: 0
+  width: 1280
+  height: 720
+  target_fps: 30
+
+face:
+  max_faces: 1
+  min_detection_confidence: 0.5
+  min_tracking_confidence: 0.5
+
+gaze:
+  filter_cutoff_freq: 1.0
+  filter_beta: 0.007
+
+screen:
+  override_resolution: null # Auto-detects if null
