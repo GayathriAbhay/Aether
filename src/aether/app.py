@@ -44,7 +44,9 @@ def run_aether():
     print("      AETHER PURE GESTURE HCI ONLINE")
     print("="*50)
     print(" - Move Index Finger Tip : Moves Cursor")
-    print(" - Pinch Thumb + Index   : Left Click / Drag")
+    print(" - Single Pinch / Tap    : Single Click")
+    print(" - Double Pinch / Tap    : Double Click")
+    print(" - Fist / Grab or Pinch  : Drag & Drop / File Selection")
     print(" - Pinch Thumb + Middle  : Right Click")
     print(" - Press 'c'             : Toggle OS Control ON/OFF")
     print(" - Press 'q' or 'ESC'    : Exit System")
@@ -70,7 +72,10 @@ def run_aether():
                     os_adapter.dispatch(
                         gesture_data["target_x"],
                         gesture_data["target_y"],
-                        gesture_data["left_click"],
+                        gesture_data["single_click"],
+                        gesture_data["double_click"],
+                        gesture_data["is_pinched"],
+                        gesture_data["is_dragging"], 
                         gesture_data["right_click"],
                         gesture_data["scroll_amount"]
                     )
@@ -83,15 +88,15 @@ def run_aether():
                     thumb_x = int((1.0 - tracking_res.landmarks[4][0]) * w)
                     thumb_y = int(tracking_res.landmarks[4][1] * h)
 
-                    # Color shift depending on click status
-                    cursor_color = (0, 0, 255) if gesture_data["left_click"] else (0, 255, 0)
+                    # Color shift depending on pinch status
+                    cursor_color = (0, 0, 255) if gesture_data["is_pinched"] else (0, 255, 0)
                     if gesture_data["right_click"]:
                         cursor_color = (255, 0, 0)
 
                     cv2.circle(canvas, (idx_x, idx_y), 10, cursor_color, -1)
                     cv2.circle(canvas, (thumb_x, thumb_y), 6, (255, 255, 0), -1)
 
-                    if gesture_data["left_click"]:
+                    if gesture_data["is_pinched"]:
                         cv2.line(canvas, (idx_x, idx_y), (thumb_x, thumb_y), (0, 0, 255), 3)
 
             # Visual HUD

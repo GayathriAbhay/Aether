@@ -13,7 +13,7 @@ class OSAdapter:
         self.screen_h = screen_h
         self.enabled = True
 
-        # Exponential Smoothing (Lower = smooth/delayed, Higher = responsive/raw)
+        # Exponential Smoothing
         self.alpha = alpha
         self.smooth_x = float(screen_w / 2)
         self.smooth_y = float(screen_h / 2)
@@ -25,12 +25,12 @@ class OSAdapter:
         # Physical Hardware Override
         self.last_physical_pos = pyautogui.position()
         self.override_time = 0.0
-        self.override_cooldown = 1.0  # Suspend gestures for 1s if hardware mouse moves
+        self.override_cooldown = 1.0
 
     def set_active(self, status: bool):
         self.enabled = status
 
-    def dispatch(self, target_x: float, target_y: float, left_click: bool, right_click: bool, scroll_amount: int):
+    def dispatch(self, target_x: float, target_y: float, single_click: bool, double_click: bool, is_pinched: bool, is_dragging: bool, right_click: bool, scroll_amount: int):
         if not self.enabled:
             return
 
@@ -57,19 +57,25 @@ class OSAdapter:
         ctypes.windll.user32.SetCursorPos(clamped_x, clamped_y)
         self.last_physical_pos = (clamped_x, clamped_y)
 
-        # 2. Left Click / Continuous Dragging
-        if left_click and not self.is_mouse_down:
+        # 2. Handle Clicks (Single & Double)
+        if double_click:
+            pyautogui.doubleClick(button='left')
+        elif single_click:
+            pyautogui.click(button='left')
+
+        # 3. Handle Dragging (Hold Pinch or Fist)
+        if is_dragging and not self.is_mouse_down:
             pyautogui.mouseDown(button='left')
             self.is_mouse_down = True
-        elif not left_click and self.is_mouse_down:
+        elif not is_dragging and self.is_mouse_down:
             pyautogui.mouseUp(button='left')
             self.is_mouse_down = False
 
-        # 3. Right Click (Debounced 500ms)
+        # 4. Right Click (Debounced 500ms)
         if right_click and (now - self.last_right_click_time > 0.5):
             pyautogui.click(button='right')
             self.last_right_click_time = now
 
-        # 4. Scroll Execution
+        # 5. Scroll Execution
         if scroll_amount != 0:
             pyautogui.scroll(scroll_amount)
