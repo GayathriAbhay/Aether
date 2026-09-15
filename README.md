@@ -19,6 +19,7 @@ Aether is a lightweight, high-precision computer vision system designed to deliv
 
 ## Repository Structure
 
+```text
 aether/
 ├── aether/
 │   ├── camera/
